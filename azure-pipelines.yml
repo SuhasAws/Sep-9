@@ -1,0 +1,40 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+ - task: TerraformInstaller@1
+   inputs:
+     terraformVersion: 'latest'
+
+- task: TerraformTaskV4@4
+  inputs:
+    provider: 'azurerm'
+    command: 'init'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/NS'
+    backendServiceArm: 'nsconnection'
+    backendAzureRmResourceGroupName: 'RG1'
+    backendAzureRmStorageAccountName: 'tfstorageee'
+    backendAzureRmContainerName: 'tfstate'
+    backendAzureRmKey: 'nsconnection.tfstate'
+
+   - task: TerraformTaskV4@4
+     inputs:
+       provider: 'azurerm'
+       command: 'plan'
+       workingDirectory: '$(System.DefaultWorkingDirectory)/NS'
+       environmentServiceNameAzureRM: 'nsconnection'
+
+    - task: TerraformTaskV4@4
+      inputs:
+        provider: 'azurerm'
+        command: 'apply'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/NS'
+        environmentServiceNameAzureRM: 'nsconnection'
